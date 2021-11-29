@@ -1,6 +1,7 @@
 ﻿using Hard.Library.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Hard.Library.Interfaces
 {
@@ -8,8 +9,10 @@ namespace Hard.Library.Interfaces
     {
         Book GetById(Guid id);
         IEnumerable<Book> GetAll();
-        Book Create(Book model);
-        void Update(Guid id, Book model);
-        void Delete(Guid id);
+        Book Create(Book book);
+        Task Update(Book book);
+        void Delete(Book book);
+        Task Emprestimo(Book book, User user);
+        Task Devolucao(Book book);
     }
 }

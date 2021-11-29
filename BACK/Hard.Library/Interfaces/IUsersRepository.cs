@@ -10,8 +10,8 @@ namespace Hard.Library.Interfaces
     {
         User GetById(Guid id);
         IEnumerable<User> GetAll();
-        User Create(User model);
-        void Update(Guid id, User model);
-        void Delete(Guid id);
+        User Create(User user);
+        Task Update(User user);
+        void Delete(User user);
     }
 }

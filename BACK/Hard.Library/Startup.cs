@@ -1,10 +1,13 @@
+using Hard.Library.Data;
 using Hard.Library.Interfaces;
 using Hard.Library.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pomelo.EntityFrameworkCore.MySql;
 
 namespace Hard.Library
 {
@@ -20,12 +23,17 @@ namespace Hard.Library
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<DataContext>(
+                options => options.UseInMemoryDatabase("database")
+            );
 
             services.AddControllers();
 
-            services.AddSingleton<IBooksRepository, BooksRepository>();
+            services.AddTransient<IBooksRepository, BooksRepository>();
 
-            services.AddSingleton<IUsersRepository, UsersRepository>();
+            services.AddTransient<IGendersRepository, GendersRepository>();
+
+            services.AddTransient<IUsersRepository, UsersRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

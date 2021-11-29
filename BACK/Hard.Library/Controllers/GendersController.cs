@@ -1,19 +1,23 @@
-﻿using Hard.Library.Interfaces;
+﻿using Hard.Library.Data;
+using Hard.Library.Interfaces;
 using Hard.Library.Models;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 
 namespace Hard.Library.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BooksController : ControllerBase
+    public class GendersController : ControllerBase
     {
-        readonly IBooksRepository _repository;
-
-        public BooksController(IBooksRepository repository)
+        readonly IGendersRepository _repository;
+        readonly IBooksRepository _repositoryBook;
+        public GendersController(IGendersRepository repository, IBooksRepository repositoryBook)
         {
             _repository = repository;
+            _repositoryBook = repositoryBook;
         }
 
         [HttpGet]
@@ -21,9 +25,9 @@ namespace Hard.Library.Controllers
         {
             try
             {
-                var books = _repository.GetAll();
+                var genders = _repository.GetAll();
 
-                return Ok(books);
+                return Ok(genders);
             }
             catch (Exception ex)
             {
@@ -40,12 +44,12 @@ namespace Hard.Library.Controllers
         {
             try
             {
-                var book = _repository.GetById(id);
+                var gender = _repository.GetById(id);
 
-                if (book == null)
+                if (gender == null)
                     return NotFound();
 
-                return Ok(book);
+                return Ok(gender);
             }
             catch (Exception ex)
             {
@@ -58,13 +62,22 @@ namespace Hard.Library.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Book model)
+        public IActionResult Post([FromServices] DataContext context, [FromBody] Gender model)
         {
             try
             {
-                var book = _repository.Create(model);
+                List<Book> Books = new List<Book>();
 
-                return Created($"api/books/{book.Id}", book);
+                foreach (var book in Books)
+                {
+                    Books.Add(_repositoryBook.GetById(book.Id));
+                }
+
+                //Books = Books;
+
+                var gender = _repository.Create(model);
+
+                return Created($"api/genders/{gender.Id}", gender);
             }
             catch (ArgumentNullException ex)
             {
@@ -83,12 +96,17 @@ namespace Hard.Library.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
-        public IActionResult Patch(Guid id, [FromBody]Book model)
+        [HttpPut]
+        public IActionResult Put([FromServices] DataContext context, [FromBody] Gender gender)
         {
             try
             {
-                _repository.Update(id, model);
+                var entity = _repository.GetById(gender.Id);
+
+                if (entity == null)
+                    return NotFound("Gênero não encontrado");
+
+                _repository.Update(gender);
 
                 return NoContent();
             }
@@ -96,7 +114,7 @@ namespace Hard.Library.Controllers
             {
                 return BadRequest(new
                 {
-                    ex.Message, 
+                    ex.Message,
                     ex.ParamName
                 });
             }
@@ -115,12 +133,13 @@ namespace Hard.Library.Controllers
                 });
             }
         }
+
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        public IActionResult Delete(Gender gender)
         {
             try
             {
-                _repository.Delete(id);
+                _repository.Delete(gender);
 
                 return NoContent();
             }

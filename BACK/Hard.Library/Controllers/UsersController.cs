@@ -1,4 +1,5 @@
-﻿using Hard.Library.Interfaces;
+﻿using Hard.Library.Data;
+using Hard.Library.Interfaces;
 using Hard.Library.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -64,7 +65,7 @@ namespace Hard.Library.Controllers
             {
                 var user = _repository.Create(model);
 
-                return Created($"api/books/{user.Id}", user);
+                return Created($"api/users/{user.Id}", user);
             }
             catch (ArgumentNullException ex)
             {
@@ -83,12 +84,17 @@ namespace Hard.Library.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
-        public IActionResult Patch(Guid id, [FromBody] User model)
+        [HttpPut]
+        public IActionResult Put([FromServices] DataContext context, [FromBody] User user)
         {
             try
             {
-                _repository.Update(id, model);
+                var entity = _repository.GetById(user.Id);
+
+                if (entity == null)
+                    return NotFound("Usuário não encontrado");
+
+                _repository.Update(user);
 
                 return NoContent();
             }
@@ -115,12 +121,13 @@ namespace Hard.Library.Controllers
                 });
             }
         }
+
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        public IActionResult Delete(User user)
         {
             try
             {
-                _repository.Delete(id);
+                _repository.Delete(user);
 
                 return NoContent();
             }
